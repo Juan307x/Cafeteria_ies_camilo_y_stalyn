@@ -3,7 +3,7 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
 /* ═══════════════════════════════════════════════
    API — usa proxy de Vite, sin problemas de CORS
    ═══════════════════════════════════════════════ */
-const BASE = '/api'
+const BASE = window.location.hostname === 'localhost' ? '/api' : 'https://cafeteria-backend-irn6.onrender.com/api'
 
 async function req(path, opts = {}) {
   const r = await fetch(`${BASE}${path}`, {
