@@ -5,14 +5,11 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
    ═══════════════════════════════════════════════ */
 const BASE = window.location.hostname === 'localhost' ? '/api' : 'https://cafeteria-backend-irn6.onrender.com/api'
 
-async function getCookie(name) {
-  return document.cookie.split(";").map(c=>c.trim()).find(c=>c.startsWith(name+"="))?.split("=")[1] || ""
-}
+function getToken() { return localStorage.getItem("access_token") || "" }
 async function req(path, opts = {}) {
-  const csrftoken = getCookie("csrftoken")
+  const token = getToken()
   const r = await fetch(`${BASE}${path}`, {
-    credentials: "include",
-    headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken, ...opts.headers },
+    headers: { "Content-Type": "application/json", ...(token ? {"Authorization": `Bearer ${token}`} : {}), ...opts.headers },
     ...opts,
   })
   if (!r.ok) {
@@ -23,7 +20,7 @@ async function req(path, opts = {}) {
 }
 
 const api = {
-  login:       (u, p) => req('/auth/login/', { method: 'POST', body: JSON.stringify({ username: u, password: p }) }),
+  login:       async (u, p) => { const d = await req("/auth/login/", { method: "POST", body: JSON.stringify({ username: u, password: p }) }); localStorage.setItem("access_token", d.access); return d.user },
   logout:      ()     => req('/auth/logout/', { method: 'POST' }),
   me:          ()     => req('/auth/me/'),
   products:    ()     => req('/products/'),
