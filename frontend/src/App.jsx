@@ -5,10 +5,14 @@ import { useState, useEffect, useCallback, useMemo } from 'react'
    ═══════════════════════════════════════════════ */
 const BASE = window.location.hostname === 'localhost' ? '/api' : 'https://cafeteria-backend-irn6.onrender.com/api'
 
+async function getCookie(name) {
+  return document.cookie.split(";").map(c=>c.trim()).find(c=>c.startsWith(name+"="))?.split("=")[1] || ""
+}
 async function req(path, opts = {}) {
+  const csrftoken = getCookie("csrftoken")
   const r = await fetch(`${BASE}${path}`, {
-    credentials: 'include',
-    headers: { 'Content-Type': 'application/json', ...opts.headers },
+    credentials: "include",
+    headers: { "Content-Type": "application/json", "X-CSRFToken": csrftoken, ...opts.headers },
     ...opts,
   })
   if (!r.ok) {
